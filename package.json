@@ -1,0 +1,19 @@
+{
+  "name": "helpdesk",
+  "version": "1.0.0",
+  "description": " ",
+  "license": "ISC",
+  "author": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "forever server.js",
+    "watch": "forever -w server.js"
+  },
+  "dependencies": {
+    "forever": "^4.0.3",
+    "koa": "^2.16.0",
+    "koa-body": "^6.0.1",
+    "uuid": "^11.1.0"
+  }
+}
