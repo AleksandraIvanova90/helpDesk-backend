@@ -4,7 +4,7 @@ import { tickets } from './src/tickets.js'
 
 const http = require('http');
 const Koa = require('koa');
-const koaBody  = require('koa-body');
+const { koaBody } = require('koa-body');
 const ticketCtlr = new TicketController(tickets)
 const app = new Koa();
 
@@ -48,7 +48,7 @@ app.use(async (ctx, next) => {
 
 app.use(async ctx => {
   const { method, id } = ctx.request.query;
-  switch (method, id) {
+  switch (method) {
     case 'allTickets':
         ctx.response.body = ticketCtlr.getAllTickets();
         return;
