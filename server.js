@@ -1,12 +1,38 @@
-import TicketController from './src/TicketController.js'
-import { tickets } from './src/tickets.js'
-
-
 const http = require('http');
 const Koa = require('koa');
 const { koaBody } = require('koa-body');
-const ticketCtlr = new TicketController(tickets)
 const app = new Koa();
+
+const ticketAll = [
+  {
+      id: 1232313,
+      name: 'Тест1',
+      description: 'Описание1',
+      status: false,
+      created: '10.03.19, 08:40',
+    },
+    {
+      id: 123434352313,
+      name: 'Тест2',
+      description: 'Описание2',
+      status: false,
+      created: '10.03.19, 12:40',
+    },
+    {
+      id: 12324545313,
+      name: 'Тест3',
+      description: 'Описание3',
+      status: false,
+      created: '11.03.19, 08:40',
+    },
+    {
+      id: 5313,
+      name: 'Тест4',
+      description: 'Описание4',
+      status: true,
+      created: '12.03.19, 08:40',
+    }
+];
 
 app.use(koaBody({
   urlencoded: true,
@@ -14,11 +40,13 @@ app.use(koaBody({
   json: true,
 }));
 
+
+
 app.use(async (ctx, next) => {
   const origin = ctx.request.get('Origin');
   if (!origin) {
     return await next();
-  }
+  };
 
   const headers = { 'Access-Control-Allow-Origin': '*', };
 
@@ -29,8 +57,8 @@ app.use(async (ctx, next) => {
     } catch (e) {
       e.headers = {...e.headers, ...headers};
       throw e;
-    }
-  }
+    };
+  };
 
   if (ctx.request.get('Access-Control-Request-Method')) {
     ctx.response.set({
@@ -40,34 +68,57 @@ app.use(async (ctx, next) => {
 
     if (ctx.request.get('Access-Control-Request-Headers')) {
       ctx.response.set('Access-Control-Allow-Headers', ctx.request.get('Access-Control-Request-Headers'));
-    }
+    };
 
     ctx.response.status = 204;
-  }
+  };
 });
 
 app.use(async ctx => {
   const { method, id } = ctx.request.query;
   switch (method) {
     case 'allTickets':
-        ctx.response.body = ticketCtlr.getAllTickets();
-        return;
-    case 'ticketById':
-        ctx.response.body = ticketCtlr.getTicketById(id);
+        ctx.response.body = ticketAll;
         return;
     case 'createTicket':
-        ctx.response.body = ticketCtlr.createTicket(name, description);
-        return;
+      const parse = JSON.parse(ctx.request.body);
+      ticketAll.push({
+        id: parse.id,
+        name: parse.name,
+        description: parse.description,
+        status: parse.status,
+        created: parse.created,
+        });
+        ctx.response.status = 200;
+        return;    
     case 'editTicket':
-        const { id, name, description } = ctx.request.body;
-        ctx.response.body = ticketCtlr.editTicket(id, name, description);
+        const dataEdit = JSON.parse(ctx.request.body);
+        const index = ticketAll.findIndex(el => el.id == dataEdit.id);
+          ticketAll[index] = {
+            ...ticketAll[index],
+            ...dataEdit,
+          };
+        ctx.response.status = 200;
         return;
     case 'deleteTicket':
-        const result = ticketCtlr.deleteTicket(id);
-        ctx.response.body = ticketCtlr.deleteTicket(id);
+      const ticketIndex = ticketAll.findIndex(el => el.id == id);
+      if (ticketIndex !== -1) {
+        ticketAll.splice(ticketIndex, 1);
+        ctx.response.body = 'удалено';
+        ctx.response.status = 200;
+        return; 
+      } else {
+        ctx.response.status = 404;
         return;
+      };
     case 'changeStatus':
-        ctx.response.body = ticketCtlr.changeStatus(id);
+        const parseToEdit = JSON.parse(ctx.request.body);
+        const elIndex = ticketAll.findIndex(el => el.id == parseToEdit.id);
+        ticketAll[elIndex] = {
+          ...ticketAll[elIndex],
+          ...parseToEdit,
+        };
+        ctx.response.status = 200;
         return;
     default:
       ctx.response.status = 404;
